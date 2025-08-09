@@ -102,7 +102,8 @@ module gpt35TurboDeployment  '../../../../../shared/bicep/cognitive-services/ope
 module openAiPrivateDnsZone '../../../../../shared/bicep/network/private-dns-zone.bicep' =  {
   // conditional scope is not working: https://github.com/Azure/bicep/issues/7367
   //scope: empty(vnetHubResourceId) ? resourceGroup() : resourceGroup(vnetHubSplitTokens[2], vnetHubSplitTokens[4]) 
-  scope: empty(hubVNetName) ? resourceGroup() : resourceGroup(vnetHubSplitTokens[2], vnetHubSplitTokens[4])
+  //scope: empty(hubVNetName) ? resourceGroup() : resourceGroup(vnetHubSplitTokens[2], vnetHubSplitTokens[4])
+  scope: resourceGroup()
   name: take('${replace(openAiDnsZoneName, '.', '-')}-PrivateDnsZoneDeployment', 64)
   params: {
     name: openAiDnsZoneName
