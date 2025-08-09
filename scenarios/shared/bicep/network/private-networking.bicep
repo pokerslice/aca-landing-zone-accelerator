@@ -37,7 +37,8 @@ var vnetHubSplitTokens = contains(vnetHubResourceId, '/') ? split(vnetHubResourc
 
 // Deploy the private DNS zone in the spoke resource group if no valid resource id is provided
 module privateDnsZone 'private-dns-zone.bicep' = {
-  scope: contains(vnetHubResourceId, '/') ? resourceGroup(vnetHubSplitTokens[2], vnetHubSplitTokens[4]) : resourceGroup()
+  //scope: contains(vnetHubResourceId, '/') ? resourceGroup(vnetHubSplitTokens[2], vnetHubSplitTokens[4]) : resourceGroup()
+  scope: resourceGroup()
   name: 'privateDnsZoneDeployment-${uniqueString(azServiceId, privateEndpointSubResourceName)}'
   params: {
     name: azServicePrivateDnsZoneName
