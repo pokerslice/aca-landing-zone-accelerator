@@ -68,6 +68,7 @@ jobs:
         with:
           azcliversion: 2.45.0
           inlineScript: |
+            az config set core.use_msal_http_cache=false
             az deployment sub what-if \
               --location ${{ vars.LOCATION }} \
               --template-file ./scenarios/aca-internal/bicep/main.bicep \
