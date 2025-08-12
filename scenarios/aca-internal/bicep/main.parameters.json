@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "workloadName": {
-      "value": "lzaaca01"
+      "value": "goldinfra"
     },
     "environment": {
       "value": "${AZURE_ENV_NAME}"
@@ -80,11 +80,11 @@
     "enableDaprInstrumentation": {
       "value": true
     },
-    "deployHelloWorldSample": {
-      "value": true
+    "deployContainers": {
+      "value": false
     },
     "applicationGatewayFqdn": {
-      "value": "acahello.demoapp.com"
+      "value": "dev.gold.turrar.com"
     },
     "deployRedisCache": {
       "value": false

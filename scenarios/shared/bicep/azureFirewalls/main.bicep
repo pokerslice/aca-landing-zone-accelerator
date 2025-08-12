@@ -109,7 +109,7 @@ var additionalPublicIpConfigurationsVar = [for ipConfiguration in additionalPubl
 }]
 var ipConfigurations = concat([
     {
-      name: publicIPAddress.outputs.name
+      name: publicIPAddress.?outputs.name
       properties: union({
           subnet: {
             id: '${vNetId}/subnets/AzureFirewallSubnet' // The subnet name must be AzureFirewallSubnet
@@ -117,7 +117,7 @@ var ipConfigurations = concat([
         }, ( !empty(publicIPAddressObject)) ? {
           //Use existing Public IP, new Public IP created in this module, or none if neither
           publicIPAddress: {
-            id: publicIPAddress.outputs.resourceId
+            id: publicIPAddress.?outputs.resourceId
           }
         } : {})
     }
@@ -152,7 +152,7 @@ module publicIPAddress '../publicIPAddresses/main.bicep' = if ( azureSkuName == 
     ]) : [
       'AllMetrics'
     ]
-    diagnosticLogCategoriesToEnable: contains(publicIPAddressObject, 'diagnosticLogCategoriesToEnable') ? publicIPAddressObject.diagnosticLogCategoriesToEnable : [
+    diagnosticLogCategoriesToEnable: publicIPAddressObject.?diagnosticLogCategoriesToEnable ?? [
       'allLogs'
     ]
     diagnosticStorageAccountId: diagnosticStorageAccountId
@@ -190,13 +190,13 @@ resource azureFirewall 'Microsoft.Network/azureFirewalls@2023-04-01' = {
     } : null
     ipConfigurations: ipConfigurations
     managementIpConfiguration: requiresManagementIp ? {
-      name: managementIPAddress.outputs.name
+      name: managementIPAddress.?outputs.name
       properties: {
         subnet: {
           id: azFwManagementSubnetId // The subnet name must be AzureFirewallManagementSubnet for a 'Basic' SKU tier firewall
         }
         publicIPAddress: {
-          id: managementIPAddress.outputs.resourceId
+          id: managementIPAddress.?outputs.resourceId
         }
       }
     } : null
@@ -260,7 +260,7 @@ resource azureFirewall_diagnosticSettings 'Microsoft.Insights/diagnosticSettings
 resource azureFirewall_roleAssignments 'Microsoft.Authorization/roleAssignments@2022-04-01' = [for (roleAssignment, index) in (roleAssignments ?? []): {
   name: guid(azureFirewall.id, roleAssignment.principalId, roleAssignment.roleDefinitionIdOrName)
   properties: {
-    roleDefinitionId: contains(builtInRoleNames, roleAssignment.roleDefinitionIdOrName) ? builtInRoleNames[roleAssignment.roleDefinitionIdOrName] : contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName)
+    roleDefinitionId: builtInRoleNames[?roleAssignment.roleDefinitionIdOrName] ?? (contains(roleAssignment.roleDefinitionIdOrName, '/providers/Microsoft.Authorization/roleDefinitions/') ? roleAssignment.roleDefinitionIdOrName : subscriptionResourceId('Microsoft.Authorization/roleDefinitions', roleAssignment.roleDefinitionIdOrName))
     principalId: roleAssignment.principalId
     description: roleAssignment.?description
     principalType: roleAssignment.?principalType

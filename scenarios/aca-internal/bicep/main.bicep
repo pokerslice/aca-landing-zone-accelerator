@@ -107,8 +107,8 @@ param enableApplicationInsights bool
 @description('Enable or disable Dapr Application Instrumentation Key used for Dapr telemetry. If Application Insights is not enabled, this parameter is ignored.')
 param enableDaprInstrumentation bool
 
-@description('Enable or disable the deployment of the Hello World Sample App. If disabled, the Application Gateway will not be deployed.')
-param deployHelloWorldSample bool
+@description('Deploy containers, the firs time deployment will create the ACR thus not images are deployable')
+param deployContainers bool
 
 @description('The FQDN of the Application Gateway. Must match the TLS Certificate.')
 param applicationGatewayFqdn string
@@ -244,18 +244,20 @@ module containerAppsEnvironment 'modules/04-container-apps-environment/deploy.ac
   }
 }
 
-module helloWorlSampleApp 'modules/05-hello-world-sample-app/deploy.hello-world.bicep' = if (deployHelloWorldSample) {
-  name: take('helloWorlSampleApp-${deployment().name}-deployment', 64)
+module goldService 'modules/05-hello-world-sample-app/deploy.hello-world.bicep' = if (deployContainers) {
+  name: take('goldService-${deployment().name}-deployment', 64)
   scope: spokeResourceGroup
   params: {
     location: location
     tags: tags
     containerRegistryUserAssignedIdentityId: supportingServices.outputs.containerRegistryUserAssignedIdentityId
+    containerRegistryName: supportingServices.outputs.containerRegistryName
+    containerImageName: 'gold-service'
     containerAppsEnvironmentId: containerAppsEnvironment.outputs.containerAppsEnvironmentId
   }
 }
 
-module applicationGateway 'modules/06-application-gateway/deploy.app-gateway.bicep' = if (deployHelloWorldSample) {
+module applicationGateway 'modules/06-application-gateway/deploy.app-gateway.bicep' =  if (deployContainers){
   name: take('applicationGateway-${deployment().name}-deployment', 64)
   scope: spokeResourceGroup
   params: {
@@ -265,7 +267,7 @@ module applicationGateway 'modules/06-application-gateway/deploy.app-gateway.bic
     workloadName: workloadName
     applicationGatewayCertificateKeyName: applicationGatewayCertificateKeyName
     applicationGatewayFqdn: applicationGatewayFqdn
-    applicationGatewayPrimaryBackendEndFqdn: (deployHelloWorldSample) ? helloWorlSampleApp.outputs.helloWorldAppFqdn : '' // To fix issue when hello world is not deployed
+    applicationGatewayPrimaryBackendEndFqdn: deployContainers ? goldService.outputs.goldServiceAppFqdn : '' 
     applicationGatewaySubnetId: spoke.outputs.spokeApplicationGatewaySubnetId
     enableApplicationGatewayCertificate: enableApplicationGatewayCertificate
     keyVaultId: supportingServices.outputs.keyVaultId
